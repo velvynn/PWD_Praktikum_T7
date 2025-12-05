@@ -1,27 +1,23 @@
 <?php
-error_reporting(0); // Menyembunyikan warning untuk production
+error_reporting(0);
 header('Content-Type: text/html; charset=utf-8');
 
-// Database configuration
 $host = "localhost";
 $username = "root";
 $password = "";
 $dbname = "lianflix";
 
 try {
-    // Create connection
     $conn = new PDO("mysql:host=$host", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Create database
     $sql = "CREATE DATABASE IF NOT EXISTS $dbname";
     $conn->exec($sql);
     echo "<p style='color: #00a8ff;'>✓ Database created successfully</p>";
     
-    // Use database
     $conn->exec("USE $dbname");
     
-    // Create films table
+    // Update table structure to include genre
     $sql = "CREATE TABLE IF NOT EXISTS films (
         id INT AUTO_INCREMENT PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
@@ -30,6 +26,7 @@ try {
         description TEXT,
         release_year YEAR,
         category VARCHAR(100),
+        genre VARCHAR(100) DEFAULT 'Animation',
         duration VARCHAR(50) DEFAULT 'Tidak diketahui',
         rating DECIMAL(3,1) DEFAULT 8.5,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -38,83 +35,56 @@ try {
     $conn->exec($sql);
     echo "<p style='color: #00a8ff;'>✓ Table films created successfully</p>";
     
-// Insert sample data
-$films = [
-    [
-        'title' => 'Moana',
-        'poster_url' => 'https://via.placeholder.com/300x400/1e3a8a/ffffff?text=MOANA',
-        'video_url' => 'https://www.youtube.com/watch?v=LKFuXETZUsI',
-        'description' => 'Seorang putri berpetualang melintasi lautan untuk menyelamatkan rakyatnya dengan bantuan dewa setengah dewa yang perkasa.',
-        'release_year' => 2016,
-        'category' => 'Animation',
-        'duration' => '107 menit',
-        'rating' => 7.6
-    ],
-    [
-        'title' => 'Inside Out 2',
-        'poster_url' => 'https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg',
-        'video_url' => 'https://www.youtube.com/watch?v=LEjhY2IQB6s',
-        'description' => 'Riley yang kini remaja menyambut Emosi baru yang tak terduga: Kecemasan, Kebanggaan, Rasa Malu, dan Kebosanan.',
-        'release_year' => 2024,
-        'category' => 'Animation',
-        'duration' => '96 menit',
-        'rating' => 8.2
-    ],
-    [
-        'title' => 'Luca',
-        'poster_url' => 'https://image.tmdb.org/t/p/w500/jTswp6KyDYKtvC52GbHagrZbGvD.jpg',
-        'video_url' => 'https://www.youtube.com/watch?v=mYfJxlgR2jw',
-        'description' => 'Petualangan musim panas seorang bocah laut di tepi pantai Italia yang indah, berteman dengan manusia.',
-        'release_year' => 2021,
-        'category' => 'Animation',
-        'duration' => '95 menit',
-        'rating' => 7.4
-    ],
-    [
-        'title' => 'Finding Nemo',
-        'poster_url' => 'https://image.tmdb.org/t/p/w500/eHuGQ10FUzK1mdOY69wF5pGgEf5.jpg',
-        'video_url' => 'https://www.youtube.com/watch?v=9oQ628Seb9w',
-        'description' => 'Seekor ikan badut yang terlalu protektif melakukan perjalanan berbahaya melintasi lautan untuk mencari putranya yang hilang.',
-        'release_year' => 2003,
-        'category' => 'Animation',
-        'duration' => '100 menit',
-        'rating' => 8.1
-    ],
-    [
-        'title' => 'The Good Dinosaur',
-        'poster_url' => 'https://image.tmdb.org/t/p/w500/2ZckiMTfSkCep2JTt1uOpPZTPpo.jpg',
-        'video_url' => 'https://www.youtube.com/watch?v=O-RgquKVTPE',
-        'description' => 'Bagaimana jika asteroid yang memusnahkan dinosaurus tidak pernah menghantam Bumi? Seorang dinosaurus remaja berteman dengan manusia.',
-        'release_year' => 2015,
-        'category' => 'Animation',
-        'duration' => '93 menit',
-        'rating' => 6.7
-    ],
-    [
-        'title' => 'Small Foot',
-        'poster_url' => 'https://image.tmdb.org/t/p/w500/4nKoB6wMVXfsYgRZK5lHZ5VMQ6J.jpg',
-        'video_url' => 'https://www.youtube.com/watch?v=gO5UR85pJMA',
-        'description' => 'Seekor Yeti muda menemukan sesuatu yang dia kira tidak ada: manusia. Petualangan menakjubkan dimulai!',
-        'release_year' => 2018,
-        'category' => 'Animation',
-        'duration' => '96 menit',
-        'rating' => 6.5
-    ],
-    [
-        'title' => 'Wreck-it Ralph',
-        'poster_url' => 'https://image.tmdb.org/t/p/w500/93YI7FQH1vFmORMecV4mnY1JKhW.jpg',
-        'video_url' => 'https://www.youtube.com/watch?v=87E6N7ToCxs',
-        'description' => 'Penjahat video game ingin menjadi pahlawan dan melakukan perjalanan melalui berbagai arcade untuk membuktikan dirinya.',
-        'release_year' => 2012,
-        'category' => 'Animation',
-        'duration' => '101 menit',
-        'rating' => 7.7
-    ],
-];
+    // Insert sample data dengan genre
+    $films = [
+        [
+            'title' => 'Moana',
+            'poster_url' => 'https://image.tmdb.org/t/p/w500/4JeejGugONWpJkbnvL12hVoesN0.jpg',
+            'video_url' => 'https://www.youtube.com/watch?v=LKFuXETZUsI',
+            'description' => 'Seorang putri berpetualang melintasi lautan untuk menyelamatkan rakyatnya dengan bantuan dewa setengah dewa yang perkasa.',
+            'release_year' => 2016,
+            'category' => 'Animation',
+            'genre' => 'Adventure',
+            'duration' => '107 menit',
+            'rating' => 7.6
+        ],
+        [
+            'title' => 'The Witcher: Nightmare of the Wolf',
+            'poster_url' => 'https://image.tmdb.org/t/p/w500/7vj5BdP6eK5paJLiF8KBQcN2wXc.jpg',
+            'video_url' => 'https://www.youtube.com/watch?v=j7qD8f2sNtE',
+            'description' => 'The Witcher: Nightmare of the Wolf is a 2021 animated film based on the Witcher series.',
+            'release_year' => 2021,
+            'category' => 'Animation',
+            'genre' => 'Dark Fantasy',
+            'duration' => '83 menit',
+            'rating' => 8.1
+        ],
+        [
+            'title' => 'Jumbo',
+            'poster_url' => 'https://image.tmdb.org/t/p/w500/aQPeznU7l2df7kS6inKTXQlgW2r.jpg',
+            'video_url' => 'https://www.youtube.com/watch?v=example',
+            'description' => 'Don, a chubby boy bullied as "Jumbo", encounters Mezi, a spirit seeking help to reunite with her troubled family\'s spirits. Their journey unfolds.',
+            'release_year' => 2023,
+            'category' => 'Animation',
+            'genre' => 'Family',
+            'duration' => '95 menit',
+            'rating' => 7.2
+        ],
+        [
+            'title' => 'The Witcher: Shows of the Deep',
+            'poster_url' => 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg',
+            'video_url' => 'https://www.youtube.com/watch?v=example2',
+            'description' => 'Hired to probe seaside village attacks, mutant monster hunter Geralt unravels an age-old conflict between humans and sea people that threatens war between kingdoms.',
+            'release_year' => 2023,
+            'category' => 'Animation',
+            'genre' => 'Dark Fantasy',
+            'duration' => '78 menit',
+            'rating' => 8.3
+        ]
+    ];
     
-    // Prepare insert statement
-    $stmt = $conn->prepare("INSERT INTO films (title, poster_url, video_url, description, release_year, category, duration, rating) 
-                           VALUES (:title, :poster_url, :video_url, :description, :release_year, :category, :duration, :rating)");
+    $stmt = $conn->prepare("INSERT INTO films (title, poster_url, video_url, description, release_year, category, genre, duration, rating) 
+                           VALUES (:title, :poster_url, :video_url, :description, :release_year, :category, :genre, :duration, :rating)");
     
     $inserted = 0;
     foreach($films as $film) {
@@ -122,10 +92,7 @@ $films = [
             $stmt->execute($film);
             $inserted++;
         } catch(PDOException $e) {
-            // Skip if duplicate entry
-            if($e->getCode() == 23000) {
-                continue;
-            }
+            if($e->getCode() == 23000) continue;
             throw $e;
         }
     }
